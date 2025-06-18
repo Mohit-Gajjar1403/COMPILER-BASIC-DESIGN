@@ -1,111 +1,130 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-int pos=0;
+// Global position variable to keep track of parsing progress
+int pos = 0;
 string input;
 
+// Skip any whitespace characters to ensure clean parsing
 void skipw()
 {
-    while(pos<input.size()&&isspace(input[pos]))
+    while (pos < input.size() && isspace(input[pos]))
         pos++;
 }
+
+// Parse and return the next full number (multi-digit allowed)
 int getnum()
 {
-    skipw();
-    int num=0;
-    while(pos<input.size()&&isdigit(input[pos]))
+    skipw(); // Skip any spaces before a number
+    int num = 0;
+    while (pos < input.size() && isdigit(input[pos]))
     {
-        num=num*10+(input[pos]-'0');//parsing string to integer
+        num = num * 10 + (input[pos] - '0'); // Convert char to int
         pos++;
-
     }
     return num;
 }
-//forward declarations
-int expression();
-int term();
-int factor();
 
-//function to handle the rounded brackets
+// Forward declarations to handle recursion
+int expression(); // handles + and -
+int term();       // handles * and /
+int factor();     // handles numbers and brackets
+
+// Handle brackets or direct numbers
 int factor()
 {
     skipw();
-    if(input[pos]=='(')
+    if (input[pos] == '(')
     {
-        pos++;
+        pos++; // Skip '('
         skipw();
-        int result=expression();
+        int result = expression(); // Evaluate the inner expression
         skipw();
-        if(input[pos]==')')
+        if (input[pos] == ')') // Expect closing bracket
             pos++;
         return result;
     }
     else
-        return getnum();
+        return getnum(); // If not bracketed, return the number
 }
-//function to handle the * and / operations
+
+// Handle * and / operations
 int term()
 {
-    int result=factor();
-    while(true)
+    int result = factor(); // Start with the first factor
+
+    while (true)
     {
-        if(input.size()<=pos)
+        if (input.size() <= pos)
             break;
-        char op=input[pos];
-        if(op=='*'||op=='/')
+
+        char op = input[pos];
+        if (op == '*' || op == '/')
         {
-            pos++;
-            int nextterm=factor();
-            if(op=='*')
-                result*=nextterm;
+            pos++; // Move to the next factor
+            int nextterm = factor();
+
+            if (op == '*')
+                result *= nextterm;
             else
             {
-                if(nextterm==0)
+                if (nextterm == 0)
                 {
-                    cout<<"Error : Division by 0"<<endl;
-                    exit(1);
+                    cout << "Error : Division by 0" << endl;
+                    exit(1); // Exit on divide-by-zero
                 }
-                result/=nextterm;
+                result /= nextterm;
             }
         }
-        else{
-            break;
+        else
+        {
+            break; // No more * or /, so return
         }
     }
+
     return result;
 }
-//function to handle + and - operations
+
+// Handle + and - operations by combining terms
 int expression()
 {
-    int result=term();
-    while(true)
+    int result = term(); // Get the first term
+
+    while (true)
     {
         skipw();
-        if(pos>=input.size())
+        if (pos >= input.size())
             break;
-        char op=input[pos];
-        if(op=='+'||op=='-')
+
+        char op = input[pos];
+        if (op == '+' || op == '-')
         {
-            pos++;
-            int nextterm=term();
-            result=op=='+'?result+nextterm:result-nextterm;
+            pos++; // Move to next term
+            int nextterm = term();
+
+            // Add or subtract based on the operator
+            result = op == '+' ? result + nextterm : result - nextterm;
         }
         else
             break;
     }
-    return result;
 
+    return result;
 }
+
 int main()
 {
-    cout<<"Enter an Arithematic Expression :"<<endl;
-    getline(cin,input);
+    cout << "Enter an Arithematic Expression :" << endl;
+    getline(cin, input); // Take entire line as input
 
-    int result=expression();
+    int result = expression(); // Start parsing and evaluating
     skipw();
-    if(pos!=input.size())
-        cout<<"Not a Valid Expression use (digits , ( , ), + , - , * , / )"<<endl;
+
+    // Final check to make sure the expression is fully consumed
+    if (pos != input.size())
+        cout << "Not a Valid Expression use (digits , ( , ), + , - , * , / )" << endl;
     else
-        cout<<"\n\nResult of Expression : "<<result<<endl;
+        cout << "\n\nResult of Expression : " << result << endl;
+
     return 0;
 }
